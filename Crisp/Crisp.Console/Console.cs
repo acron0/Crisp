@@ -9,16 +9,29 @@ namespace Crisp
 {
     public class Console
     {
+        #region Command Class
+        internal class Command
+        {
+            public string CommandKey;
+            public string Description;
+            public ICommandHandler Handler;
+        }
+        #endregion
+
         #region Variables
 
-        private Dictionary<string, ICommandHandler> commandHandlers_ = new Dictionary<string, ICommandHandler>();
+        private List<Command> commandHandlers_ = new List<Command>();
+
+        internal bool isRunning_ = false;
 
         #endregion
 
         #region Properties
 
-        public string CommandLinePrefix { get; private set; }
+        public string CursorPrefix { get; private set; }
         public string Introduction { get; private set; }
+
+        internal Command[] Commands { get { return commandHandlers_.ToArray(); } }
 
         #endregion
 
@@ -27,12 +40,21 @@ namespace Crisp
         public Console()
         {
             // register default handlers
-            RegisterCommandHandler<HelpCommandHandler>("help");
+            RegisterCommandHandler<HelpCommandHandler>(HelpCommandHandler.Command, "Displays this information.");
+            RegisterCommandHandler<ExitCommandHandler>(ExitCommandHandler.Command, "Exits the application.");
         }
 
-        public Console(string introMessage) : this()
+        public Console(string introMessage) 
+            : this()
         {
             Introduction = introMessage;
+        }
+
+        public Console(string introMessage, string cursorPrefix)
+            : this()
+        {
+            Introduction = introMessage;
+            CursorPrefix = cursorPrefix;
         }
 
         /// <summary>
@@ -40,25 +62,26 @@ namespace Crisp
         /// </summary>
         public void Run()
         {
+            isRunning_ = true;
+
             // intro
             if (!string.IsNullOrWhiteSpace(Introduction))
                 System.Console.Write(Introduction);
 
             // enter loop
-            for (; ; )
+            while (isRunning_)
             {
                 // print
-                System.Console.Write("#" + CommandLinePrefix + ">");
+                System.Console.Write(CursorPrefix + ">");
 
                 string input = System.Console.ReadLine();
-                if (input == "exit")
-                    break;
-                else if (!string.IsNullOrWhiteSpace(input))
+                if (!string.IsNullOrWhiteSpace(input))
                 {
                     try
                     {
                         System.Console.Write(" ");
                         PerformCommand(input);
+                        System.Console.Write(System.Environment.NewLine);
                     }
                     catch (System.Exception ex)
                     {
@@ -70,6 +93,15 @@ namespace Crisp
 
         #endregion
 
+        #region Internal Methods
+
+        internal void Exit()
+        {
+            isRunning_ = false;
+        }
+
+        #endregion
+
         #region Private Methods
 
         /// <summary>
@@ -77,12 +109,15 @@ namespace Crisp
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="command"></param>
-        private void RegisterCommandHandler<T>(string command) where T : ICommandHandler, new()
+        private void RegisterCommandHandler<T>(string command, string description) where T : ICommandHandler, new()
         {
-            if (command == "exit")
-                throw new ArgumentException("The 'exit' command is reserved!");
+            if (commandHandlers_.Any(c=>c.CommandKey == command))
+                throw new ArgumentException("The '"+command+"' command is already registered.");
 
-            commandHandlers_.Add(command, new T());
+            commandHandlers_.Add(new Command() {
+                CommandKey = command, 
+                Description = description, 
+                Handler = new T() } );
         }
 
         /// <summary>
@@ -92,10 +127,12 @@ namespace Crisp
         private void PerformCommand(string input)
         {
             string[] commandStrings = input.Split(' ');
-            ICommandHandler handler;
-            if (!commandHandlers_.TryGetValue(commandStrings[0], out handler))
+            Command command = commandHandlers_.Find(c => c.CommandKey == commandStrings[0]);
+
+            if (command == null)
                 throw new ArgumentException("Command '" + commandStrings[0] + "' not recognised.");
-            handler.Run(commandStrings[0], commandStrings.Skip(1).ToArray());
+
+            command.Handler.Run(this, commandStrings[0], commandStrings.Skip(1).ToArray());
         }
 
         #endregion

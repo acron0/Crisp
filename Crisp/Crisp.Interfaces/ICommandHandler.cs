@@ -7,6 +7,7 @@ namespace Crisp.Interfaces
 {
     public interface ICommandHandler
     {
-        void Run(string command, string[] args);
+        void   Run(Console console, string command, string[] args);
+        string Help(Console console, string command);
     }
 }

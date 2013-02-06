@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Crisp.Console\Console.cs" />
+    <Compile Include="Crisp.Handlers\ExitCommandHandler.cs" />
     <Compile Include="Crisp.Handlers\HelpCommandHandler.cs" />
     <Compile Include="Crisp.Interfaces\ICommandHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

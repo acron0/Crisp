@@ -22,7 +22,8 @@ namespace Crisp
 
         private List<Command> commandHandlers_ = new List<Command>();
 
-        internal bool isRunning_ = false;
+        private bool isRunning_ = false;
+        private string initialCommand_ = null;
 
         #endregion
 
@@ -56,6 +57,13 @@ namespace Crisp
             Introduction = introMessage;
             CursorPrefix = cursorPrefix;
         }
+        public Console(string introMessage, string cursorPrefix, string initialCommand)
+            : this()
+        {
+            Introduction = introMessage;
+            CursorPrefix = cursorPrefix;
+            initialCommand_ = initialCommand;
+        }
 
         /// <summary>
         /// Starts the Crisp console loop.
@@ -66,7 +74,10 @@ namespace Crisp
 
             // intro
             if (!string.IsNullOrWhiteSpace(Introduction))
+            {
                 System.Console.Write(Introduction);
+                System.Console.Write(System.Environment.NewLine);
+            }
 
             // enter loop
             while (isRunning_)
@@ -74,7 +85,17 @@ namespace Crisp
                 // print
                 System.Console.Write(CursorPrefix + ">");
 
-                string input = System.Console.ReadLine();
+                string input = null;
+                if(!string.IsNullOrWhiteSpace(initialCommand_))
+                {
+                    input = initialCommand_;
+                    initialCommand_ = null;
+                }
+                else
+                {
+                    input = System.Console.ReadLine();
+                }
+
                 if (!string.IsNullOrWhiteSpace(input))
                 {
                     try
@@ -85,7 +106,9 @@ namespace Crisp
                     }
                     catch (System.Exception ex)
                     {
-                        System.Console.WriteLine("An exception occurred: " + ex.Message);
+                        System.Console.ForegroundColor = ConsoleColor.Red;
+                        System.Console.Error.WriteLine("An exception occurred: " + ex.Message);
+                        System.Console.ResetColor();
                     }
                 }
             }
@@ -129,12 +152,13 @@ namespace Crisp
         private void PerformCommand(string input)
         {
             string[] commandStrings = input.Split(' ');
-            Command command = commandHandlers_.Find(c => c.CommandKey == commandStrings[0]);
+            string commandKey = commandStrings[0].ToLower();
+            Command command = commandHandlers_.Find(c => c.CommandKey == commandKey);
 
             if (command == null)
-                throw new ArgumentException("Command '" + commandStrings[0] + "' not recognised.");
+                throw new ArgumentException("Command '" + commandKey + "' not recognised.");
 
-            command.Handler.Run(this, commandStrings[0], commandStrings.Skip(1).ToArray());
+            command.Handler.Run(this, commandKey, commandStrings.Skip(1).ToArray());
         }
 
         #endregion

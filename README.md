@@ -29,7 +29,7 @@ You add commands by registering CommandHandlers (ICommandHandler).
     crispApp.RegisterCommandHandler(new KillServiceCommandHandler(), "kill", "Kills the specified service.");
 
 Commands can be called with options, switches and parameters. The interface also provides a Help() function 
-that can be implemented to provide further information on a command. This is called with "help <command>".
+that can be implemented to provide further information on a command. This is called with "help [command]".
 
 **TODO**
  * Name completion

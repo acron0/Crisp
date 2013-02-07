@@ -30,6 +30,28 @@ You add commands by registering CommandHandlers (ICommandHandler).
 
 Commands can be called with options, switches and parameters. The interface also provides a Help() function 
 that can be implemented to provide further information on a command. This is called with "help [command]".
+  
+    
+You can also nest Consoles within one another. For instance, a command handler could do this:
+
+    public void Run(Crisp.Console console, string command, string[] args) // from ICommandHandler
+    {
+        if(command == "start")
+        {
+            System.Console.WriteLine(" Starting New Service\n");
+            Console serviceConsole = new Crisp.Console("", "New Service");
+            serviceConsole.RegisterCommandHandler(new GetCommandHandler(), "get", "Returns JSON data from the service.");
+            serviceConsole.Run();
+        }
+    }
+-
+    Welcome to Crisp
+    #>start
+     Starting New Service
+
+    New Service>exit
+    
+    #>
 
 **TODO**
  * Name completion

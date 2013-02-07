@@ -39,9 +39,6 @@ namespace Crisp.Handlers
                     {
                         System.Console.WriteLine("There is no further information on the '" + needHelpWith + "' command.");
                     }
-                    
-
-                    
                 }
             }
         }

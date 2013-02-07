@@ -40,8 +40,8 @@ namespace Crisp
         public Console()
         {
             // register default handlers
-            RegisterCommandHandler<HelpCommandHandler>(HelpCommandHandler.Command, "Displays this information.");
-            RegisterCommandHandler<ExitCommandHandler>(ExitCommandHandler.Command, "Exits the application.");
+            RegisterCommandHandler(new HelpCommandHandler(), HelpCommandHandler.Command, "Type '" + HelpCommandHandler.Command + "' followed by the command you'd like further information about.");
+            RegisterCommandHandler(new ExitCommandHandler(), ExitCommandHandler.Command, "Exits the application.");
         }
 
         public Console(string introMessage) 
@@ -91,6 +91,24 @@ namespace Crisp
             }
         }
 
+        /// <summary>
+        /// Binds a command to a command handler
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="command"></param>
+        public void RegisterCommandHandler(ICommandHandler handler, string command, string description)
+        {
+            if (commandHandlers_.Any(c => c.CommandKey == command))
+                throw new ArgumentException("The '" + command + "' command is already registered.");
+
+            commandHandlers_.Add(new Command()
+            {
+                CommandKey = command,
+                Description = description,
+                Handler = handler
+            });
+        }
+
         #endregion
 
         #region Internal Methods
@@ -103,22 +121,6 @@ namespace Crisp
         #endregion
 
         #region Private Methods
-
-        /// <summary>
-        /// Binds a command to a command handler
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="command"></param>
-        private void RegisterCommandHandler<T>(string command, string description) where T : ICommandHandler, new()
-        {
-            if (commandHandlers_.Any(c=>c.CommandKey == command))
-                throw new ArgumentException("The '"+command+"' command is already registered.");
-
-            commandHandlers_.Add(new Command() {
-                CommandKey = command, 
-                Description = description, 
-                Handler = new T() } );
-        }
 
         /// <summary>
         /// Finds the appropriate handler and performs

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Crisp.Interfaces;
 using Crisp.Handlers;
+using System.IO;
 
 namespace Crisp
 {
@@ -89,6 +90,7 @@ namespace Crisp
                 if(!string.IsNullOrWhiteSpace(initialCommand_))
                 {
                     input = initialCommand_;
+                    System.Console.Write(initialCommand_+System.Environment.NewLine);
                     initialCommand_ = null;
                 }
                 else

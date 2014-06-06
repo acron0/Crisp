@@ -53,7 +53,7 @@ You can also nest Consoles within one another. For instance, a command handler c
     
     #>
     
-**License**
+**License**  
 BSD
 
 **TODO**

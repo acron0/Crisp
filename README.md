@@ -52,6 +52,9 @@ You can also nest Consoles within one another. For instance, a command handler c
     New Service>exit
     
     #>
+    
+**License**
+BSD
 
 **TODO**
  * Name completion
